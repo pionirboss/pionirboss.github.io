@@ -196,6 +196,53 @@
             background: #1E40AF;
         }
 
+        /* Diamond Options Grid */
+        .diamond-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .diamond-option {
+            background: var(--light);
+            border: 2px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .diamond-option:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .diamond-option.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .diamond-amount {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .diamond-bonus {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .diamond-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
         /* Order Form */
         .order-form {
             background: var(--light);
@@ -434,8 +481,18 @@
                 grid-template-columns: 1fr;
             }
 
+            .diamond-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
             .popup-actions {
                 flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .diamond-options {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -477,8 +534,14 @@
                 </div>
                 <h3>DIAMOND</h3>
                 <p>Pilih jumlah diamond sesuai kebutuhanmu</p>
-                <div class="price">Rp 5.000 - Rp 500.000</div>
-                <button class="buy-btn" data-product="Diamond 74" data-price="25000">PILIH DIAMOND</button>
+                <div class="price">Rp 3.290 - Rp 1.128.000</div>
+                
+                <!-- Diamond Options Grid -->
+                <div class="diamond-options" id="diamondOptions">
+                    <!-- Diamond options will be populated by JavaScript -->
+                </div>
+                
+                <button class="buy-btn" id="selectDiamondBtn">PILIH DIAMOND</button>
             </div>
 
             <!-- Weekly Diamond Pass -->
@@ -512,7 +575,7 @@
                 <label for="product">Pilih Produk</label>
                 <select id="product">
                     <option value="">-- Pilih Produk --</option>
-                    <option value="Diamond 74">Diamond 74 - Rp 25.000</option>
+                    <option value="Diamond">Diamond</option>
                     <option value="Weekly Diamond Pass">Weekly Diamond Pass - Rp 35.000</option>
                     <option value="Starlight">Starlight - Rp 150.000</option>
                 </select>
@@ -598,18 +661,85 @@
     </footer>
 
     <script>
+        // Diamond Data from your screenshot
+        const diamondOptions = [
+            { amount: "11 +11", price: 3290 },
+            { amount: "17 +2", price: 5470 },
+            { amount: "17 +17", price: 5170 },
+            { amount: "25 +3", price: 7520 },
+            { amount: "25 +25", price: 7520 },
+            { amount: "40 +4", price: 11280 },
+            { amount: "53 +8", price: 15040 },
+            { amount: "77 +8", price: 21620 },
+            { amount: "154 +16", price: 43240 },
+            { amount: "217 +23", price: 61100 },
+            { amount: "256 +40", price: 75200 },
+            { amount: "367 +41", price: 103400 },
+            { amount: "503 +65", price: 141000 },
+            { amount: "774 +101", price: 216200 },
+            { amount: "1798 +302", price: 470000 },
+            { amount: "4931 +827", price: 1128000 }
+        ];
+
+        // Populate Diamond Options
+        const diamondOptionsContainer = document.getElementById('diamondOptions');
+        let selectedDiamond = null;
+
+        diamondOptions.forEach((option, index) => {
+            const diamondOption = document.createElement('div');
+            diamondOption.className = 'diamond-option';
+            diamondOption.innerHTML = `
+                <div class="diamond-amount">${option.amount}</div>
+                <div class="diamond-bonus">Diamond</div>
+                <div class="diamond-price">Rp ${option.price.toLocaleString('id-ID')}</div>
+            `;
+            
+            diamondOption.addEventListener('click', function() {
+                // Remove selected class from all options
+                document.querySelectorAll('.diamond-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                this.classList.add('selected');
+                selectedDiamond = option;
+                
+                // Update product select
+                document.getElementById('product').value = 'Diamond';
+            });
+            
+            diamondOptionsContainer.appendChild(diamondOption);
+        });
+
         // Product Selection
         document.querySelectorAll('.buy-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const product = this.getAttribute('data-product');
-                const price = this.getAttribute('data-price');
-                
-                document.getElementById('product').value = product;
-                
-                // Scroll ke form
-                document.querySelector('.order-form').scrollIntoView({
-                    behavior: 'smooth'
+            if (!button.id) { // Exclude the diamond select button
+                button.addEventListener('click', function() {
+                    const product = this.getAttribute('data-product');
+                    const price = this.getAttribute('data-price');
+                    
+                    document.getElementById('product').value = product;
+                    
+                    // Scroll ke form
+                    document.querySelector('.order-form').scrollIntoView({
+                        behavior: 'smooth'
+                    });
                 });
+            }
+        });
+
+        // Diamond Select Button
+        document.getElementById('selectDiamondBtn').addEventListener('click', function() {
+            if (!selectedDiamond) {
+                alert('Pilih jumlah diamond terlebih dahulu!');
+                return;
+            }
+            
+            document.getElementById('product').value = 'Diamond';
+            
+            // Scroll ke form
+            document.querySelector('.order-form').scrollIntoView({
+                behavior: 'smooth'
             });
         });
 
@@ -624,4 +754,123 @@
         });
 
         // Popup Functions
-        const
+        const popupOverlay = document.getElementById('popupOverlay');
+        const orderSummary = document.getElementById('orderSummary');
+        const submitOrderBtn = document.getElementById('submitOrder');
+        const closePopup = document.querySelector('.close-popup');
+        const cancelOrderBtn = document.getElementById('cancelOrder');
+        const confirmOrderBtn = document.getElementById('confirmOrder');
+
+        function showPopup() {
+            // Validasi form
+            const product = document.getElementById('product').value;
+            const playerId = document.getElementById('playerId').value;
+            const serverId = document.getElementById('serverId').value;
+            const email = document.getElementById('email').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            const voucher = document.getElementById('voucher').value;
+            
+            if (!product || !playerId || !serverId || !email || !whatsapp) {
+                alert('Harap lengkapi semua data yang diperlukan!');
+                return;
+            }
+
+            // Calculate total price
+            let totalPrice = 0;
+            let productName = product;
+
+            if (product === 'Diamond') {
+                if (!selectedDiamond) {
+                    alert('Pilih jumlah diamond terlebih dahulu!');
+                    return;
+                }
+                productName = `Diamond ${selectedDiamond.amount}`;
+                totalPrice = selectedDiamond.price;
+            } else if (product === 'Weekly Diamond Pass') {
+                totalPrice = 35000;
+            } else if (product === 'Starlight') {
+                totalPrice = 150000;
+            }
+
+            // Update order summary
+            orderSummary.innerHTML = `
+                <div class="summary-item">
+                    <span>Produk:</span>
+                    <span>${productName}</span>
+                </div>
+                <div class="summary-item">
+                    <span>ID Player:</span>
+                    <span>${playerId}</span>
+                </div>
+                <div class="summary-item">
+                    <span>ID Server:</span>
+                    <span>${serverId}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Email:</span>
+                    <span>${email}</span>
+                </div>
+                <div class="summary-item">
+                    <span>WhatsApp:</span>
+                    <span>${whatsapp}</span>
+                </div>
+                ${voucher ? `
+                <div class="summary-item">
+                    <span>Kode Voucher:</span>
+                    <span>${voucher}</span>
+                </div>
+                ` : ''}
+                <div class="summary-item">
+                    <span>Total Pembayaran:</span>
+                    <span>Rp ${totalPrice.toLocaleString('id-ID')}</span>
+                </div>
+            `;
+
+            // Show popup
+            popupOverlay.style.display = 'flex';
+        }
+
+        function hidePopup() {
+            popupOverlay.style.display = 'none';
+        }
+
+        // Event Listeners
+        submitOrderBtn.addEventListener('click', showPopup);
+        closePopup.addEventListener('click', hidePopup);
+        cancelOrderBtn.addEventListener('click', hidePopup);
+        
+        confirmOrderBtn.addEventListener('click', function() {
+            alert('Pesanan berhasil dikonfirmasi! Silakan lanjutkan pembayaran.');
+            hidePopup();
+            // Reset form
+            document.querySelector('.order-form').reset();
+            document.querySelectorAll('.payment-method').forEach(m => {
+                m.classList.remove('selected');
+            });
+            document.querySelectorAll('.diamond-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            selectedDiamond = null;
+        });
+
+        // Close popup when clicking outside
+        popupOverlay.addEventListener('click', function(e) {
+            if (e.target === popupOverlay) {
+                hidePopup();
+            }
+        });
+
+        // Customer Service Click
+        document.querySelector('.customer-service').addEventListener('click', function() {
+            alert('Hubungi Customer Service kami di: WhatsApp: 08123456789 | Email: cs@pionirstore.com');
+        });
+
+        // CTA Button Scroll to Form
+        document.querySelector('.cta-btn').addEventListener('click', function() {
+            document.querySelector('.order-form').scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
